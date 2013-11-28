@@ -229,6 +229,17 @@ IPv6RS should be disabled globally when requesting a Prefix Delegation like so:
 .Pp
 .D1 interface eth0
 .D1 ia_pd 1 eth1/0 eth2/1
+.It Ic ia_pd_suffix Ar address Ns
+The second half of
+.Ar address
+will be used as the IPv6 suffix for any delegations.
+Defaults to the suffix of the link-local address on the interface.
+Can be set globally or per interface.
+Example:
+.Pp
+.D1 ia_pd_suffix ::1
+.D1 interface eth0
+.D1 ia_pd_suffix ::cafe:babe
 .It Ic ipv4only
 Only configure IPv4.
 .It Ic ipv6only

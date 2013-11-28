@@ -154,12 +154,19 @@ ipv6_makeaddr(struct in6_addr *addr, const struct interface *ifp,
 
 	memcpy(addr, prefix, sizeof(*prefix));
 
-	/* Try and make the address from the first local-link address */
-	ap = ipv6_linklocal(ifp);
-	if (ap) {
-		addr->s6_addr32[2] = ap->addr.s6_addr32[2];
-		addr->s6_addr32[3] = ap->addr.s6_addr32[3];
+	/* Use the user-provided suffix, otherwise try and make the address
+	 * from the first local-link address */
+	if(ifp->options->ia_suffix) {
+		addr->s6_addr32[2] = ifp->options->ia_suffix->s6_addr32[2];
+		addr->s6_addr32[3] = ifp->options->ia_suffix->s6_addr32[3];
 		return 0;
+	} else {
+		ap = ipv6_linklocal(ifp);
+		if (ap) {
+			addr->s6_addr32[2] = ap->addr.s6_addr32[2];
+			addr->s6_addr32[3] = ap->addr.s6_addr32[3];
+			return 0;
+		}
 	}
 
 	/* Because we delay a few functions until we get a local-link address

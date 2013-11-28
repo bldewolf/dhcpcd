@@ -73,6 +73,7 @@ unsigned long long options = 0;
 #define O_NOIPV4		O_BASE + 16
 #define O_NOIPV6		O_BASE + 17
 #define O_IAID			O_BASE + 18
+#define O_IA_PD_SUFFIX		O_BASE + 19
 
 char *dev_load;
 
@@ -142,6 +143,7 @@ const struct option cf_options[] = {
 	{"hostname_short",  no_argument,       NULL, O_HOSTNAME_SHORT},
 	{"dev",             required_argument, NULL, O_DEV},
 	{"nodev",           no_argument,       NULL, O_NODEV},
+	{"ia_pd_suffix",    required_argument, NULL, O_IA_PD_SUFFIX},
 	{NULL,              0,                 NULL, '\0'}
 };
 
@@ -1122,8 +1124,19 @@ parse_option(struct if_options *ifo, int opt, const char *arg)
 				}
 			}
 		}
-#endif
 		break;
+	case O_IA_PD_SUFFIX:
+		free(ifo->ia_suffix);
+		ifo->ia_suffix = malloc(sizeof(*ifo->ia_suffix));
+		if (inet_pton(AF_INET6, arg, ifo->ia_suffix) != 1) {
+			syslog(LOG_WARNING, "%s is not a valid IPv6 address",
+				arg);
+			free(ifo->ia_suffix);
+			ifo->ia_suffix = NULL;
+			return -1;
+		}
+		break;
+#endif
 	case O_HOSTNAME_SHORT:
 		ifo->options |= DHCPCD_HOSTNAME | DHCPCD_HOSTNAME_SHORT;
 		break;
@@ -1321,6 +1334,8 @@ free_options(struct if_options *ifo)
 #ifdef INET6
 		for (i = 0; i < ifo->ia_len; i++)
 			free(ifo->ia[i].sla);
+
+		free(ifo->ia_suffix);
 #endif
 		free(ifo->ia);
 

@@ -157,6 +157,7 @@ struct if_options {
 	uint16_t ia_type;
 	struct if_ia *ia;
 	size_t ia_len;
+	struct in6_addr *ia_suffix;
 #ifdef INET6
 	int dadtransmits;
 #endif
